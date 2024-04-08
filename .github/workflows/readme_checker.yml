@@ -1,7 +1,7 @@
 name: README Checker
 
 on:
-  push:
+  commit:
     branches:
       - main
 
