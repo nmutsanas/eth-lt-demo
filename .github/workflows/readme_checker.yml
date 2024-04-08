@@ -1,7 +1,7 @@
 name: README Checker
 
 on:
-  commit:
+  push:
     branches:
       - main
 
@@ -32,3 +32,23 @@ jobs:
           echo "Error: Paragraph contains only $word_count words, less than 100."
           exit 1
         fi
+
+    - name: Set Commit Status
+      if: always()
+      uses: actions/github-script@v4
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const context = github.context;
+          const octokit = new github.GitHub(process.env.GITHUB_TOKEN);
+
+          const status = {
+            ...context.repo,
+            sha: context.sha,
+            state: process.env.RESULT === 'success' ? 'success' : 'failure',
+            target_url: 'https://github.com/Aequivinius/LA-demo/actions/runs/' + context.runId,
+            description: process.env.RESULT === 'success' ? 'README checks passed' : 'README checks failed',
+            context: 'README Checker'
+          };
+
+          await octokit.repos.createCommitStatus(status);
